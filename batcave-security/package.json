@@ -1,0 +1,19 @@
+{
+  "name": "batcave-security",
+  "version": "1.0.0",
+  "description": "Système de badges de la batcave",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "better-sqlite3": "^12.10.0",
+    "dotenv": "^16.6.1",
+    "express": "^5.2.1"
+  }
+}
