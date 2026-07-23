@@ -1,84 +1,57 @@
+require("dotenv").config();
+
 const express = require("express");
-const sqlite3 = require("sqlite3").verbose();
+const session = require("express-session");
+const helmet = require("helmet");
+const path = require("path");
+const { initDb } = require("./config/db");
+const authRoutes = require("./routes/auth");
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
-// Middleware JSON
+initDb();
+
+app.use(
+    helmet({
+        contentSecurityPolicy: {
+            directives: {
+                defaultSrc: ["'self'"],
+                imgSrc: ["'self'", "data:", "https://lh3.googleusercontent.com"],
+                styleSrc: ["'self'", "'unsafe-inline'"],
+                scriptSrc: ["'self'"]
+            }
+        }
+    })
+);
+
 app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
-// Connexion à SQLite
-const db = new sqlite3.Database("./database.db", (err) => {
-    if (err) {
-        console.error("Erreur connexion BDD :", err.message);
-    } else {
-        console.log("Connecté à SQLite.");
-    }
-});
+app.use(
+    session({
+        secret: process.env.SESSION_SECRET || "dev-insecure-secret",
+        resave: false,
+        saveUninitialized: false,
+        cookie: {
+            httpOnly: true,
+            sameSite: "lax",
+            secure: process.env.NODE_ENV === "production",
+            maxAge: 1000 * 60 * 60 * 8
+        }
+    })
+);
 
-// Création table users si elle n'existe pas
-db.run(`
-    CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT UNIQUE NOT NULL,
-        password TEXT NOT NULL
-    )
-`, (err) => {
-    if (err) {
-        console.error("Erreur création table :", err.message);
-    } else {
-        console.log("Table users prête.");
-    }
-});
+app.use(express.static(path.join(__dirname, "public")));
+app.use(authRoutes);
 
-// Route test
 app.get("/", (req, res) => {
-    res.send("Serveur Node.js + SQLite OK");
-});
-
-// Ajouter un utilisateur
-app.post("/users", (req, res) => {
-    const { username, password } = req.body;
-
-    if (!username || !password) {
-        return res.status(400).json({
-            error: "username et password requis"
-        });
+    if (req.session?.user) {
+        return res.redirect("/dashboard");
     }
-
-    const sql = `
-        INSERT INTO users (username, password)
-        VALUES (?, ?)
-    `;
-
-    db.run(sql, [username, password], function(err) {
-        if (err) {
-            return res.status(400).json({
-                error: err.message
-            });
-        }
-
-        res.json({
-            id: this.lastID,
-            username
-        });
-    });
+    res.redirect("/login.html");
 });
 
-// Lister les users
-app.get("/users", (req, res) => {
-    db.all("SELECT id, username FROM users", [], (err, rows) => {
-        if (err) {
-            return res.status(500).json({
-                error: err.message
-            });
-        }
-
-        res.json(rows);
-    });
-});
-
-// Démarrage serveur
 app.listen(PORT, () => {
-    console.log(`Serveur lancé : http://localhost:${PORT}`);
+    console.log(`Batcave Security (OAuth 2.0 / OIDC) — http://localhost:${PORT}`);
 });
