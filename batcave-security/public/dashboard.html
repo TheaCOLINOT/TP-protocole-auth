@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Batcave — Tableau de bord</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <main class="card dashboard">
+        <header class="dashboard-header">
+            <h1>Tableau de bord</h1>
+            <button id="logoutBtn" class="btn-secondary">Déconnexion</button>
+        </header>
+
+        <section id="profileSection">
+            <h2>Profil</h2>
+            <p>Chargement...</p>
+        </section>
+
+        <section id="actionsSection">
+            <h2>Actions (scopes)</h2>
+            <button id="refreshProfileBtn">Recharger le profil</button>
+            <button id="batmobileBtn">Contrôle Batmobile (batmobile:control)</button>
+            <button id="batmobileStatusBtn">Statut Batmobile (batmobile:status)</button>
+            <button id="armoryBtn">Armurerie (armory:weapons)</button>
+        </section>
+
+        <section id="resultSection" class="hidden">
+            <h2>Résultat</h2>
+            <pre id="resultData"></pre>
+        </section>
+
+        <section id="passwordSection">
+            <h2>Modifier le mot de passe</h2>
+            <form id="changePasswordForm">
+                <label for="oldPassword">Ancien mot de passe</label>
+                <input type="password" id="oldPassword" required>
+
+                <label for="newPassword">Nouveau mot de passe</label>
+                <input type="password" id="newPassword" required>
+
+                <button type="submit">Changer le mot de passe</button>
+            </form>
+            <p id="passwordMessage" class="hidden"></p>
+        </section>
+    </main>
+
+    <script src="/dashboard.js"></script>
+</body>
+</html>

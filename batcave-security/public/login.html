@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Batcave — Connexion</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <main class="card">
+        <h1>Batcave Security</h1>
+        <p class="subtitle">Protocole zéro-confiance · MFA TOTP</p>
+
+        <form id="loginForm">
+            <label for="username">Identifiant</label>
+            <input type="text" id="username" name="username" required autocomplete="username">
+
+            <label for="password">Mot de passe</label>
+            <input type="password" id="password" name="password" required autocomplete="current-password">
+
+            <button type="submit">Se connecter</button>
+        </form>
+
+        <section id="totpSection" class="hidden">
+            <h2>Vérification 2FA</h2>
+            <p class="subtitle">Saisissez le code à 6 chiffres de votre application d'authentification.</p>
+            <label for="totpCode">Code TOTP</label>
+            <input type="text" id="totpCode" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="000000">
+            <button type="button" id="verifyTotpBtn">Valider le code</button>
+        </section>
+
+        <section id="setupSection" class="hidden">
+            <h2>Activation 2FA obligatoire</h2>
+            <p class="subtitle">Scannez le QR code, puis confirmez avec le premier code généré.</p>
+            <img id="qrImage" alt="QR Code 2FA" class="qr-image hidden">
+            <p id="secretBackup" class="hint hidden"></p>
+            <button type="button" id="startSetupBtn">Générer mon QR code</button>
+
+            <label for="setupCode">Code de confirmation</label>
+            <input type="text" id="setupCode" inputmode="numeric" maxlength="6" placeholder="000000">
+            <button type="button" id="confirmSetupBtn">Confirmer l'activation</button>
+        </section>
+
+        <p id="errorMessage" class="error hidden"></p>
+        <p id="successMessage" class="success hidden"></p>
+        <p class="hint">Compte test : batman / Alfred123!@#Secure<br>Allié (scopes limités) : nightwing / Nightwing123!@#</p>
+    </main>
+
+    <script src="/login.js"></script>
+</body>
+</html>

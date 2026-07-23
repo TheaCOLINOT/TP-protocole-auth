@@ -1,84 +1,35 @@
+require("dotenv").config();
+
 const express = require("express");
-const sqlite3 = require("sqlite3").verbose();
+const helmet = require("helmet");
+const cookieParser = require("cookie-parser");
+const path = require("path");
+const { initDb } = require("./config/db");
+const authRoutes = require("./routes/auth");
+const userRoutes = require("./routes/user");
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
-// Middleware JSON
+initDb();
+
+// En-têtes de sécurité HTTP (CSP, X-Frame-Options, nosniff, etc.)
+app.use(helmet());
+
 app.use(express.json());
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, "public")));
 
-// Connexion à SQLite
-const db = new sqlite3.Database("./database.db", (err) => {
-    if (err) {
-        console.error("Erreur connexion BDD :", err.message);
-    } else {
-        console.log("Connecté à SQLite.");
-    }
-});
+app.use("/api/auth", authRoutes);
+app.use("/api/user", userRoutes);
 
-// Création table users si elle n'existe pas
-db.run(`
-    CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT UNIQUE NOT NULL,
-        password TEXT NOT NULL
-    )
-`, (err) => {
-    if (err) {
-        console.error("Erreur création table :", err.message);
-    } else {
-        console.log("Table users prête.");
-    }
-});
+// Alias demandé par le TP : /api/verify-2fa
+app.post("/api/verify-2fa", authRoutes.verify2FAHandler);
 
-// Route test
 app.get("/", (req, res) => {
-    res.send("Serveur Node.js + SQLite OK");
+    res.redirect("/login.html");
 });
 
-// Ajouter un utilisateur
-app.post("/users", (req, res) => {
-    const { username, password } = req.body;
-
-    if (!username || !password) {
-        return res.status(400).json({
-            error: "username et password requis"
-        });
-    }
-
-    const sql = `
-        INSERT INTO users (username, password)
-        VALUES (?, ?)
-    `;
-
-    db.run(sql, [username, password], function(err) {
-        if (err) {
-            return res.status(400).json({
-                error: err.message
-            });
-        }
-
-        res.json({
-            id: this.lastID,
-            username
-        });
-    });
-});
-
-// Lister les users
-app.get("/users", (req, res) => {
-    db.all("SELECT id, username FROM users", [], (err, rows) => {
-        if (err) {
-            return res.status(500).json({
-                error: err.message
-            });
-        }
-
-        res.json(rows);
-    });
-});
-
-// Démarrage serveur
 app.listen(PORT, () => {
-    console.log(`Serveur lancé : http://localhost:${PORT}`);
+    console.log(`Batcave Security — http://localhost:${PORT}`);
 });
